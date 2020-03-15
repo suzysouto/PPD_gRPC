@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Bizingo 2.0</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+        <script type="text/javascript" src="tabuleiro.js"></script>
+    </head>
+    <body>
+        <div id="interface">
+            <div id="bp">
+                <div class="messages"></div>
+                <form id="chat">
+                    <input type="text" name="username" placeholder="Digite seu usuário."><hr>
+                    <input type="text" name="message" placeholder="Digite sua menssagem.">                    
+                    <button type="submit">Enviar</button>
+                </form>
+                <script type="text/javascript">
+                    let socket = io('http://localhost:3000'); 
+
+                    function renderMessage(message) {
+                        $('.messages').append('<div class="message"><strong>'+ message.author +'</strong>: '+ message.message+'</div>');
+                    }
+
+                     socket.on('previousMessages', function(messages) {
+                        for(message of messages) {
+                            renderMessage(message);
+                        }
+                    });
+
+                    socket.on('receivedMessage', function(message) {
+                        renderMessage(message);
+                    });
+
+                    $('#chat').submit(function(event) {
+                        event.preventDefault();
+
+                        let author = $('input[name=username]').val();
+                        let message = $('input[name=message]').val();
+
+                        if(author.length && message.length) {
+                            let messageObject = {
+                                author: author,
+                                message: message,
+                            };
+
+                            socket.emit('sendMessage', messageObject);
+                        }
+                    });
+                </script>
+            </div>
+            <div id="game"><canvas id="screen" width="600" height="400"></canvas></div>
+            <div id="menu"></div>
+            <div id="log"></div>
+        </div>
+        <script type="text/javascript">
+
+            let tabuleiroHeigth = 400;
+            let triangleHeight = tabuleiroHeigth/11; //qtd de trg
+            let triangleLado = triangleHeight*1.1547;//formula trg eql
+            let tabuleiroWeight = triangleLado*11;
+            let quadInicial = 11;
+
+            createTabuleiro(triangleHeight, triangleLado, quadInicial); 
+        </script>
+    </body>
+    </html>
